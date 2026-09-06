@@ -2,11 +2,9 @@ FROM node:18-alpine3.17
 
 WORKDIR /usr/app
 
-COPY package*.json /usr/app/
+COPY . .
 
 RUN npm install
-
-COPY . .
 
 ENV MONGO_URI=uriPlaceholder
 ENV MONGO_USERNAME=usernamePlaceholder
