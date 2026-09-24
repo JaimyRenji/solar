@@ -1,22 +1,21 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs 'nodejs-22-6-0'
+    }
+
     stages {
-        stage('Checkout') {
+        stage('VM Node Version') {
             steps {
-                echo 'Checking out source code'
+                sh 'node -v'
+                sh 'npm -v'
             }
         }
 
-        stage('Build') {
+        stage('Installing Dependencies') {
             steps {
-                echo 'Building Solar System application'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                echo 'Running tests'
+                sh 'npm install --no-audit'
             }
         }
     }
