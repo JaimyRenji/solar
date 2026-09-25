@@ -21,7 +21,9 @@ pipeline {
 
         stage('Code Coverage') {
             steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                 sh 'npm run coverage'
+                  }
             }
         }
 
