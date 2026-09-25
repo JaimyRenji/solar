@@ -4,13 +4,13 @@ pipeline {
   stages {
 
     stage('Installing Dependencies') {
-      steps {
+    steps {
         sh '''
-          export NODE_OPTIONS="--max-old-space-size=256"
-          npm install --no-audit --no-fund --jobs=1
+            export NODE_OPTIONS="--max-old-space-size=256"
+            npm install --no-audit --no-fund --jobs=1
         '''
-      }
     }
+}
 
     stage('Dependency Scanning') {
     
