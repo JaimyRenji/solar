@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '/')));
 app.use(cors())
 
-mongoose.connect("mongodb+srv://superuser:superpass@supercluster.d83jj.mongodb.net/superData", {
+mongoose.connect("mongodb+srv://superuser:superpassword@supercluster.d83jj.mongodb.net/superData", {
     user: process.env.MONGO_USERNAME,
     pass: process.env.MONGO_PASSWORD,
     useNewUrlParser: true,
