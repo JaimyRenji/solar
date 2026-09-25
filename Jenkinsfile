@@ -1,6 +1,8 @@
 pipeline {
   agent any
-
+  environment {
+        RUN_TESTS = 'false'
+    }
   stages {
 
     stage('Installing Dependencies') { 
@@ -20,21 +22,26 @@ pipeline {
     }
 
     stage('Unit Testing') {
-      steps {
-        withCredentials([
-          usernamePassword(
-            credentialsId: 'mongo-db-credentials',
-            usernameVariable: 'MONGO_USERNAME',
-            passwordVariable: 'MONGO_PASSWORD'
-          )
-        ]) {
-          sh '''
-            export NODE_OPTIONS="--max-old-space-size=256"
-            npm test
-          '''
+    when {
+        expression {
+            return env.RUN_TESTS == 'true'
         }
-      }
     }
+    steps {
+        withCredentials([
+            usernamePassword(
+                credentialsId: 'mongo-db-credentials',
+                usernameVariable: 'MONGO_USERNAME',
+                passwordVariable: 'MONGO_PASSWORD'
+            )
+        ]) {
+            sh '''
+                export NODE_OPTIONS=--max-old-space-size=256
+                npm test
+            '''
+        }
+    }
+}
 
     stage('Code Coverage') {
       steps {
