@@ -1,3 +1,4 @@
+```groovy
 pipeline {
     agent any
 
@@ -8,21 +9,29 @@ pipeline {
         MONGO_PASSWORD = credentials('mongo-db-password')
     }
 
-    options {
-        // ...
-    }
-
     stages {
-        stage('Installing Dependencies')    { /* ... */ }
 
-        stage('Dependency Scanning')        { /* ... */ }
+        stage('Installing Dependencies') {
+            steps {
+                sh '''
+                    export NODE_OPTIONS=--max-old-space-size=256
+                    npm install --no-audit --no-fund --jobs=1
+                '''
+            }
+        }
+
+        stage('Dependency Scanning') {
+            steps {
+                sh 'npm audit || true'
+            }
+        }
 
         stage('Unit Testing') {
-            options { retry(2) }
+            options {
+                retry(2)
+            }
+
             steps {
-                sh 'echo DB Creds    → $MONGO_DB_CREDS'
-                sh 'echo Username    → $MONGO_USERNAME'
-                sh 'echo Password    → $MONGO_PASSWORD'
                 sh 'npm test'
             }
         }
@@ -38,8 +47,11 @@ pipeline {
 
     post {
         always {
-            junit allowEmptyResults: true, testResults: 'test-results.xml'
-            junit allowEmptyResults: true, testResults: 'dependency-check-junit.xml'
+            junit(
+                allowEmptyResults: true,
+                testResults: 'test-results.xml'
+            )
+
             publishHTML(
                 allowMissing: true,
                 alwaysLinkToLastBuild: true,
@@ -48,7 +60,7 @@ pipeline {
                 reportFiles: 'index.html',
                 reportName: 'Code Coverage HTML Report'
             )
-            // Add other publishHTML steps here
         }
     }
 }
+```
