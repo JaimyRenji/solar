@@ -1,7 +1,7 @@
 pipeline {
   agent any
   environment {
-        RUN_TESTS = 'false'
+        MONGO_URI = "mongodb+srv://supercluster.d83jj.mongodb.net/superData"
     }
   stages {
 
