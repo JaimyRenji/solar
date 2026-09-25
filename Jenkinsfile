@@ -1,69 +1,48 @@
 pipeline {
     agent any
 
-    parameters {
-        string(
-            name: 'USER_NAME',
-            defaultValue: 'Hello, Jenkins from Parameter',
-            description: 'Name of the user'
-        )
-    }
-
     environment {
-        GREETING = 'Hello, Jenkins! from environment variable'
+        SONAR_SCANNER_HOME = tool 'sonarqube-scanner-6.1.0'
     }
 
     stages {
-        stage('Print Basic String') {
+
+        stage('Installing Dependencies') {
             steps {
-                echo 'Basic String Interpolation Examples:'
+                sh 'npm install'
             }
         }
-        stage('Interpolation with Variable') {
+
+        stage('Unit Testing') {
             steps {
-                script {
-                    def name = 'Jenkins User'
-                    echo 'Hello, ${name}!'   // single quotes: no interpolation
-                    echo "Hello, ${name}!"   // double quotes: interpolates
-                }
+                sh 'npm test'
             }
         }
-        stage('Interpolation with Parameter') {
+
+        stage('Code Coverage') {
             steps {
-                script {
-                    echo "Hello, ${params.USER_NAME}"
-                }
+                sh 'npm run coverage'
             }
         }
-        stage('Interpolation with Environment Variable') {
+
+        stage('SAST - SonarQube') {
             steps {
-                script {
-                    echo "Environment Variable Greeting: ${env.GREETING}"
-                }
-            }
-        }
-        stage('Interpolation with Expression') {
-            steps {
-                script {
-                    def x = 5
-                    def y = 10
-                    echo "Sum of x and y is: ${x + y}"
-                }
-            }
-        }
-        stage('Complex Interpolation') {
-            steps {
-                script {
-                    def list = [1, 2, 3]
-                    echo "The list has ${list.size()} items: ${list.join(', ')}"
-                }
-            }
-        }
-        stage('Job Parameters') {
-            steps {
-                script {
-                    def buildNumber = currentBuild.number
-                    echo "This is build number ${buildNumber}"
+
+                withCredentials([
+                    string(
+                        credentialsId: 'sonarqube-token',
+                        variable: 'SONAR_TOKEN'
+                    )
+                ]) {
+
+                    sh """
+                        $SONAR_SCANNER_HOME/bin/sonar-scanner \
+                          -Dsonar.projectKey=Solar-System-Project \
+                          -Dsonar.sources=app.js \
+                          -Dsonar.host.url=http://43.204.142.38:9000 \
+                          -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                          -Dsonar.token=\$SONAR_TOKEN
+                    """
                 }
             }
         }
