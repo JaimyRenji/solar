@@ -14,7 +14,7 @@ pipeline {
     }
 }
 
-    stage('Dependency Scanning') {
+    stage('Dependency Scanning ') {
     
       steps {
         sh 'npm audit || true'
