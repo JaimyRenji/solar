@@ -1,65 +1,71 @@
 pipeline {
     agent any
 
+    parameters {
+        string(
+            name: 'USER_NAME',
+            defaultValue: 'Hello, Jenkins from Parameter',
+            description: 'Name of the user'
+        )
+    }
+
     environment {
-        MONGO_URI      = "mongodb+srv://supercluster.d83jj.mongodb.net/superData"
-        MONGO_DB_CREDS = credentials('mongo-db-credentials')
-        MONGO_USERNAME = credentials('mongo-db-username')
-        MONGO_PASSWORD = credentials('mongo-db-password')
+        GREETING = 'Hello, Jenkins! from environment variable'
     }
 
     stages {
-
-        stage('Installing Dependencies') {
+        stage('Print Basic String') {
             steps {
-                sh '''
-                    export NODE_OPTIONS=--max-old-space-size=256
-                    npm install --no-audit --no-fund --jobs=1
-                '''
+                echo 'Basic String Interpolation Examples:'
             }
         }
-
-        stage('Dependency Scanning') {
+        stage('Interpolation with Variable') {
             steps {
-                sh 'npm audit || true'
+                script {
+                    def name = 'Jenkins User'
+                    echo 'Hello, ${name}!'   // single quotes: no interpolation
+                    echo "Hello, ${name}!"   // double quotes: interpolates
+                }
             }
         }
-
-        stage('Unit Testing') {
-            options {
-                retry(2)
-            }
-
+        stage('Interpolation with Parameter') {
             steps {
-                sh 'npm test'
+                script {
+                    echo "Hello, ${params.USER_NAME}"
+                }
             }
         }
-
-        stage('Code Coverage') {
+        stage('Interpolation with Environment Variable') {
             steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                    sh 'npm run coverage'
+                script {
+                    echo "Environment Variable Greeting: ${env.GREETING}"
+                }
+            }
+        }
+        stage('Interpolation with Expression') {
+            steps {
+                script {
+                    def x = 5
+                    def y = 10
+                    echo "Sum of x and y is: ${x + y}"
+                }
+            }
+        }
+        stage('Complex Interpolation') {
+            steps {
+                script {
+                    def list = [1, 2, 3]
+                    echo "The list has ${list.size()} items: ${list.join(', ')}"
+                }
+            }
+        }
+        stage('Job Parameters') {
+            steps {
+                script {
+                    def buildNumber = currentBuild.number
+                    echo "This is build number ${buildNumber}"
                 }
             }
         }
     }
-
-    post {
-        always {
-            junit(
-                allowEmptyResults: true,
-                testResults: 'test-results.xml'
-            )
-
-            publishHTML(
-                allowMissing: true,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: 'coverage/lcov-report',
-                reportFiles: 'index.html',
-                reportName: 'Code Coverage HTML Report'
-            )
-        }
-    }
 }
-
