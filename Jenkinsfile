@@ -29,7 +29,8 @@ pipeline {
 
         stage('SAST - SonarQube') {
             steps {
-
+            timeout(time: 60, unit: 'SECONDS') {
+            withSonarQubeEnv('sonar-qube-server') {
                 withCredentials([
                     string(
                         credentialsId: 'sonarqube-token',
@@ -47,6 +48,9 @@ pipeline {
                     """
                 }
             }
+                waitForQualityGate abortPipeline: true
+            }
+          }
         }
     }
 }
