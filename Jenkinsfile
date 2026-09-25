@@ -3,7 +3,7 @@ pipeline {
 
   stages {
 
-    stage('Installing Dependencies') {
+    stage('Installing Dependencies') { 
     steps {
         sh '''
             export NODE_OPTIONS="--max-old-space-size=256"
